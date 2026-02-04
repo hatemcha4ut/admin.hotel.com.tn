@@ -7,7 +7,6 @@
 
 #root {
   min-height: 100vh;
-copilot/add-bookings-list-and-details-pages
   background: #f4f6f9;
 }
 
@@ -155,7 +154,6 @@ th {
   border: none;
   padding: 0;
   color: #2563eb;
-
 }
 
 .app-shell {
@@ -249,12 +247,9 @@ button {
   border: none;
   background: #0f172a;
   color: #ffffff;
- main
   cursor: pointer;
   font-weight: 600;
 }
-
- copilot/add-bookings-list-and-details-pages
 .pagination {
   display: flex;
   justify-content: flex-end;
@@ -273,8 +268,6 @@ button {
   cursor: pointer;
 }
 
-.pagination button:disabled {
-
 button.secondary {
   background: #e2e8f0;
   color: #0f172a;
@@ -286,12 +279,9 @@ button.primary {
 }
 
 button:disabled {
- main
   opacity: 0.6;
   cursor: not-allowed;
 }
-
- copilot/add-bookings-list-and-details-pages
 .loading,
 .error,
 .success,
@@ -353,6 +343,7 @@ button:disabled {
   padding: 8px 12px;
   border-radius: 8px;
   border: 1px solid #d1d5db;
+}
 
 .muted {
   color: #64748b;
@@ -392,5 +383,4 @@ button:disabled {
     flex-direction: row;
     flex-wrap: wrap;
   }
- main
 }
