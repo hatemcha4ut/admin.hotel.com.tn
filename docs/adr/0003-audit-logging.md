@@ -83,10 +83,18 @@ CREATE INDEX idx_audit_logs_resource ON audit_logs (resource_type, resource_id);
 ```sql
 CREATE FUNCTION log_booking_changes()
 RETURNS TRIGGER AS $$
+DECLARE
+  user_email TEXT;
 BEGIN
+  -- Extract email from JWT claims if available
+  user_email := COALESCE(
+    current_setting('request.jwt.claims', true)::json->>'email',
+    'system'
+  );
+  
   INSERT INTO audit_logs (admin_email, action_type, resource_type, resource_id, details)
   VALUES (
-    auth.email(),
+    user_email,
     TG_OP || ' booking',
     'booking',
     NEW.id::TEXT,
@@ -94,7 +102,7 @@ BEGIN
   );
   RETURN NEW;
 END;
-$$ LANGUAGE plpgsql;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
 
 CREATE TRIGGER audit_booking_updates
 AFTER UPDATE ON bookings
@@ -141,11 +149,16 @@ CREATE POLICY "Admins can read audit logs"
     )
   );
 
--- Only database triggers or service role can write
--- (No direct INSERT from frontend)
-CREATE POLICY "Service role can insert audit logs"
+-- Allow inserts from authenticated admins (for application-level logging)
+-- Database triggers run with SECURITY DEFINER and bypass RLS
+CREATE POLICY "Admins can insert audit logs"
   ON audit_logs FOR INSERT
-  WITH CHECK (false);  -- Deny all client-side inserts
+  WITH CHECK (
+    EXISTS (
+      SELECT 1 FROM admin_users
+      WHERE email = auth.email()
+    )
+  );
 ```
 
 ## Consequences

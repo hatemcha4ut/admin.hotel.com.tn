@@ -104,7 +104,7 @@ CREATE POLICY "Admin users can read all if admin role"
 
 Frontend authorization check in `AuthProvider.tsx`:
 ```typescript
-const user = supabase.auth.getUser();
+const { data: { user } } = await supabase.auth.getUser();
 const { data: adminUser } = await supabase
   .from('admin_users')
   .select('role')

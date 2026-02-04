@@ -111,20 +111,32 @@ CREATE POLICY "Admins can update bookings"
 
 ### How to Test RLS Policies
 
-Use Supabase SQL Editor or psql:
+Use Supabase testing with actual user sessions:
 
-```sql
--- Simulate admin user
-SET request.jwt.claims TO '{"email": "admin@hotel.com"}';
+```typescript
+// Test with admin user
+const adminSupabase = createClient(url, anonKey);
+await adminSupabase.auth.signInWithPassword({
+  email: 'admin@hotel.com',
+  password: 'test'
+});
 
--- Should succeed
-SELECT * FROM bookings;
+const { data: bookings } = await adminSupabase
+  .from('bookings')
+  .select('*');
+// Should succeed and return bookings
 
--- Simulate non-admin user
-SET request.jwt.claims TO '{"email": "guest@example.com"}';
+// Test with non-admin user
+const guestSupabase = createClient(url, anonKey);
+await guestSupabase.auth.signInWithPassword({
+  email: 'guest@example.com',
+  password: 'test'
+});
 
--- Should return empty (no access)
-SELECT * FROM bookings;
+const { data: noBookings } = await guestSupabase
+  .from('bookings')
+  .select('*');
+// Should return empty (no access)
 ```
 
 ### How to Debug Policy Failures
