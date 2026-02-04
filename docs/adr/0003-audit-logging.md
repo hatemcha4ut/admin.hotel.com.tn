@@ -86,11 +86,15 @@ RETURNS TRIGGER AS $$
 DECLARE
   user_email TEXT;
 BEGIN
-  -- Extract email from JWT claims if available
-  user_email := COALESCE(
-    current_setting('request.jwt.claims', true)::json->>'email',
-    'system'
-  );
+  -- Extract email from JWT claims if available, fallback to 'system'
+  BEGIN
+    user_email := COALESCE(
+      current_setting('request.jwt.claim.email', true),
+      'system'
+    );
+  EXCEPTION WHEN OTHERS THEN
+    user_email := 'system';
+  END;
   
   INSERT INTO audit_logs (admin_email, action_type, resource_type, resource_id, details)
   VALUES (
@@ -139,17 +143,17 @@ await logAction({
 ```sql
 ALTER TABLE audit_logs ENABLE ROW LEVEL SECURITY;
 
--- Admins can read all logs
-CREATE POLICY "Admins can read audit logs"
+-- All admin users can read audit logs (for transparency and debugging)
+CREATE POLICY "All admins can read audit logs"
   ON audit_logs FOR SELECT
   USING (
     EXISTS (
       SELECT 1 FROM admin_users
-      WHERE email = auth.email() AND role IN ('admin', 'manager')
+      WHERE email = auth.email()
     )
   );
 
--- Allow inserts from authenticated admins (for application-level logging)
+-- All admin users can insert audit logs (for application-level logging)
 -- Database triggers run with SECURITY DEFINER and bypass RLS
 CREATE POLICY "Admins can insert audit logs"
   ON audit_logs FOR INSERT
