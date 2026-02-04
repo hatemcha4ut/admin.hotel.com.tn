@@ -1,9 +1,18 @@
+import { useState } from 'react'
 import './App.css'
+import BookingDetailsPage from './pages/BookingDetailsPage'
+import BookingsListPage from './pages/BookingsListPage'
 
-function App() {
+const App = () => {
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
   return (
-    <div>
-      <h1>Admin portal</h1>
+    <div className="app">
+      {selectedId ? (
+        <BookingDetailsPage bookingId={selectedId} onBack={() => setSelectedId(null)} />
+      ) : (
+        <BookingsListPage onSelectBooking={setSelectedId} />
+      )}
     </div>
   )
 }
