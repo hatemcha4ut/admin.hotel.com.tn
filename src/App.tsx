@@ -1,3 +1,12 @@
+ copilot/add-bookings-list-and-details-pages
+import { useState } from 'react'
+import './App.css'
+import BookingDetailsPage from './pages/BookingDetailsPage'
+import BookingsListPage from './pages/BookingsListPage'
+
+const App = () => {
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+
 import { Navigate, Route, Routes } from 'react-router-dom'
 import './App.css'
 import { useAuth } from './auth/useAuth'
@@ -24,9 +33,18 @@ function RequireAdmin({ children }: { children: React.ReactElement }) {
 
   return children
 }
+ main
 
-function App() {
   return (
+copilot/add-bookings-list-and-details-pages
+    <div className="app">
+      {selectedId ? (
+        <BookingDetailsPage bookingId={selectedId} onBack={() => setSelectedId(null)} />
+      ) : (
+        <BookingsListPage onSelectBooking={setSelectedId} />
+      )}
+    </div>
+
     <Routes>
       <Route path="/login" element={<LoginPage />} />
       <Route path="/access-denied" element={<AccessDeniedPage />} />
@@ -77,6 +95,7 @@ function App() {
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+ main
   )
 }
 

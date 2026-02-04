@@ -1,8 +1,39 @@
+ copilot/add-bookings-list-and-details-pages
+:root {
+  font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #1f2937;
+  background-color: #f4f6f9;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+
+ main
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+ copilot/add-bookings-list-and-details-pages
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select {
+  font-family: inherit;
+
   background: #f8fafc;
+ main
 }
