@@ -2,6 +2,24 @@
 
 Admin portal interface for hotel management backoffice.
 
+## Supabase Auth
+
+Configure the Supabase credentials before running the app:
+
+```bash
+VITE_SUPABASE_URL=your-project-url
+VITE_SUPABASE_ANON_KEY=your-anon-key
+```
+
+The `admin_users` table should contain at least:
+
+| column | type |
+| --- | --- |
+| email | text |
+| role | text |
+
+Only users present in `admin_users` can access the admin interface. The UI adapts the menu to the `role` value.
+
 ## How to run locally
 
 1. Install dependencies:
