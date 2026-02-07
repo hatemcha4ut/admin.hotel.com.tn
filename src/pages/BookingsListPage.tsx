@@ -151,13 +151,14 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                   <th>Stay</th>
                   <th>Status</th>
                   <th>Total</th>
+                  <th>WhatsApp</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="empty">
+                    <td colSpan={7} className="empty">
                       No bookings found.
                     </td>
                   </tr>
@@ -179,6 +180,25 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                         </span>
                       </td>
                       <td>{formatCurrency(booking.total_amount)}</td>
+                      <td>
+                        {booking.guest_whatsapp_number ? (
+                          <button
+                            className="link"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              const cleanNumber = booking.guest_whatsapp_number!.replace(/[^0-9]/g, '')
+                              const message = `Bonjour, nous vous contactons au sujet de votre réservation %23${booking.id} sur hotel.com.tn.`
+                              const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
+                              window.open(url, '_blank', 'noopener,noreferrer')
+                            }}
+                          >
+                            {booking.guest_whatsapp_number}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                       <td>
                         <button className="link" type="button" onClick={() => onSelectBooking(booking.id)}>
                           View
