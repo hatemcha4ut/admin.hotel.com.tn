@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import type { BookingRecord, BookingStatus } from '../data/supabase'
 import { fetchBookingById, updateBookingStatus, fetchUserWhatsApp } from '../data/supabase'
 import WhatsAppButton from '../components/WhatsAppButton'
+import { getBookingModeLabel } from '../utils/whatsapp'
 
 interface BookingDetailsPageProps {
   bookingId: string
@@ -143,8 +144,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
                 {booking.guest_whatsapp_number || userWhatsApp || '—'}
               </p>
               <p className="muted">
-                {booking.booking_mode === 'SANS_COMPTE' ? 'Réservation invité' : 
-                 booking.booking_mode === 'AVEC_COMPTE' ? 'Réservation connectée' : '—'}
+                {getBookingModeLabel(booking.booking_mode)}
               </p>
               <div style={{ marginTop: '10px' }}>
                 <WhatsAppButton

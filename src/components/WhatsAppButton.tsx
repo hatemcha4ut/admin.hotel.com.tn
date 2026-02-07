@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { openWhatsAppChat } from '../utils/whatsapp'
 
 interface WhatsAppButtonProps {
@@ -24,11 +24,21 @@ const WhatsAppButton = ({ bookingId, guestWhatsApp, userWhatsApp }: WhatsAppButt
     try {
       await navigator.clipboard.writeText(whatsappNumber)
       setCopied(true)
-      setTimeout(() => setCopied(false), 2000)
     } catch (err) {
       console.error('Failed to copy:', err)
     }
   }
+  
+  // Reset copied state after 2 seconds
+  useEffect(() => {
+    if (!copied) return
+    
+    const timeoutId = setTimeout(() => {
+      setCopied(false)
+    }, 2000)
+    
+    return () => clearTimeout(timeoutId)
+  }, [copied])
   
   return (
     <div className="whatsapp-actions">

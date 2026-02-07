@@ -4,6 +4,17 @@
 const DOMAIN = 'hotel.com.tn'
 
 /**
+ * Gets the display label for a booking mode
+ * @param mode - The booking mode ('SANS_COMPTE' | 'AVEC_COMPTE' | null)
+ * @returns The French label for the booking mode
+ */
+export const getBookingModeLabel = (mode: string | null): string => {
+  if (mode === 'SANS_COMPTE') return 'Réservation invité'
+  if (mode === 'AVEC_COMPTE') return 'Réservation connectée'
+  return '—'
+}
+
+/**
  * Builds a WhatsApp click-to-chat URL with a pre-filled message
  * @param phoneNumber - WhatsApp number (will be cleaned to digits only)
  * @param bookingId - The booking ID to include in the message
