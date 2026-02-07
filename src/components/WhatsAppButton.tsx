@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { openWhatsAppChat } from '../utils/whatsapp'
 
 interface WhatsAppButtonProps {
   bookingId: string
@@ -14,19 +15,7 @@ const WhatsAppButton = ({ bookingId, guestWhatsApp, userWhatsApp }: WhatsAppButt
   
   const handleWhatsAppClick = () => {
     if (!whatsappNumber) return
-    
-    // Strip + prefix and keep only digits
-    const cleanNumber = whatsappNumber.replace(/[^0-9]/g, '')
-    
-    // Build message template in French
-    const message = `Bonjour, nous vous contactons au sujet de votre réservation %23${bookingId} sur hotel.com.tn.`
-    const encodedMessage = encodeURIComponent(message)
-    
-    // Build WhatsApp click-to-chat URL
-    const url = `https://wa.me/${cleanNumber}?text=${encodedMessage}`
-    
-    // Open in new tab
-    window.open(url, '_blank', 'noopener,noreferrer')
+    openWhatsAppChat(whatsappNumber, bookingId)
   }
   
   const handleCopyNumber = async () => {

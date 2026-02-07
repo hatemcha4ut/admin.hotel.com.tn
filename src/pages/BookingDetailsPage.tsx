@@ -144,7 +144,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
               </p>
               <p className="muted">
                 {booking.booking_mode === 'SANS_COMPTE' ? 'Réservation invité' : 
-                 booking.booking_mode === 'AVEC_COMPTE' ? 'Réservation connecté' : '—'}
+                 booking.booking_mode === 'AVEC_COMPTE' ? 'Réservation connectée' : '—'}
               </p>
               <div style={{ marginTop: '10px' }}>
                 <WhatsAppButton

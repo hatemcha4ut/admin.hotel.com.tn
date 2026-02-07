@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { BookingListFilters, BookingRecord, BookingStatus } from '../data/supabase'
 import { fetchBookings } from '../data/supabase'
+import { openWhatsAppChat } from '../utils/whatsapp'
 
 interface BookingsListPageProps {
   onSelectBooking: (id: string) => void
@@ -187,10 +188,7 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                             type="button"
                             onClick={(e) => {
                               e.stopPropagation()
-                              const cleanNumber = booking.guest_whatsapp_number!.replace(/[^0-9]/g, '')
-                              const message = `Bonjour, nous vous contactons au sujet de votre réservation %23${booking.id} sur hotel.com.tn.`
-                              const url = `https://wa.me/${cleanNumber}?text=${encodeURIComponent(message)}`
-                              window.open(url, '_blank', 'noopener,noreferrer')
+                              openWhatsAppChat(booking.guest_whatsapp_number!, booking.id)
                             }}
                           >
                             {booking.guest_whatsapp_number}
