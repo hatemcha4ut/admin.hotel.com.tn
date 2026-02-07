@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import type { BookingRecord, BookingStatus } from '../data/supabase'
-import { fetchBookingById, updateBookingStatus } from '../data/supabase'
+import { fetchBookingById, updateBookingStatus, fetchUserWhatsApp } from '../data/supabase'
+import WhatsAppButton from '../components/WhatsAppButton'
+import { getBookingModeLabel } from '../utils/whatsapp'
 
 interface BookingDetailsPageProps {
   bookingId: string
@@ -24,6 +26,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState<string | null>(null)
+  const [userWhatsApp, setUserWhatsApp] = useState<string | null>(null)
 
   useEffect(() => {
     let isMounted = true
@@ -37,6 +40,13 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
           setBooking(record)
           if (record?.status) {
             setStatus(record.status)
+          }
+          // Fetch user WhatsApp if user_id exists
+          if (record?.user_id) {
+            const whatsapp = await fetchUserWhatsApp(record.user_id)
+            if (isMounted) {
+              setUserWhatsApp(whatsapp)
+            }
           }
         }
       } catch (err) {
@@ -126,6 +136,22 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
                 <button type="button" onClick={handleSave} disabled={saving}>
                   {saving ? 'Saving…' : 'Update status'}
                 </button>
+              </div>
+            </div>
+            <div>
+              <h2>Contact WhatsApp</h2>
+              <p className="detail-title">
+                {booking.guest_whatsapp_number || userWhatsApp || '—'}
+              </p>
+              <p className="muted">
+                {getBookingModeLabel(booking.booking_mode)}
+              </p>
+              <div style={{ marginTop: '10px' }}>
+                <WhatsAppButton
+                  bookingId={booking.id}
+                  guestWhatsApp={booking.guest_whatsapp_number}
+                  userWhatsApp={userWhatsApp}
+                />
               </div>
             </div>
           </div>

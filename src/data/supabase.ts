@@ -9,6 +9,9 @@ export interface BookingRecord {
   check_out: string | null
   total_amount: number | null
   created_at: string | null
+  guest_whatsapp_number: string | null
+  user_id: string | null
+  booking_mode: string | null
 }
 
 export interface BookingListResponse {
@@ -110,7 +113,7 @@ export const fetchBookings = async (
   pageSize: number,
 ): Promise<BookingListResponse> => {
   const query = buildListQuery(filters, page, pageSize)
-  const response = await fetch(`${getSupabaseUrl()}/rest/v1/bookings?${query}`, {
+  const response = await fetch(`${getSupabaseUrl()}/rest/v1/bookings?select=*&${query}`, {
     headers: {
       ...buildHeaders(),
       Prefer: 'count=exact',
@@ -131,7 +134,7 @@ export const fetchBookings = async (
 
 export const fetchBookingById = async (id: string): Promise<BookingRecord | null> => {
   const response = await fetch(
-    `${getSupabaseUrl()}/rest/v1/bookings?id=eq.${encodeURIComponent(id)}&limit=1`,
+    `${getSupabaseUrl()}/rest/v1/bookings?id=eq.${encodeURIComponent(id)}&select=*&limit=1`,
     {
     headers: buildHeaders(),
     },
@@ -155,4 +158,14 @@ export const updateBookingStatus = async (id: string, update: BookingStatusUpdat
   if (!response.ok) {
     throw new Error('Failed to update booking')
   }
+}
+
+export const fetchUserWhatsApp = async (userId: string): Promise<string | null> => {
+  const response = await fetch(
+    `${getSupabaseUrl()}/rest/v1/profiles?user_id=eq.${encodeURIComponent(userId)}&select=whatsapp_number&limit=1`,
+    { headers: buildHeaders() },
+  )
+  if (!response.ok) return null
+  const data = await response.json() as Array<{ whatsapp_number: string | null }>
+  return data[0]?.whatsapp_number ?? null
 }

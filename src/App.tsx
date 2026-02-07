@@ -8,6 +8,7 @@ import AccessDeniedPage from './pages/AccessDeniedPage'
 import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
+import ReservationsPage from './pages/ReservationsPage'
 
 function RequireAdmin({ children }: { children: React.ReactElement }) {
   const { session, loading, hasAdminAccess } = useAuth()
@@ -41,15 +42,7 @@ const App = () => {
           }
         >
           <Route index element={<Dashboard />} />
-          <Route
-            path="reservations"
-            element={
-              <PlaceholderPage
-                title="Réservations"
-                description="Gérez les réservations et le planning des chambres."
-              />
-            }
-          />
+          <Route path="reservations" element={<ReservationsPage />} />
           <Route
             path="reports"
             element={

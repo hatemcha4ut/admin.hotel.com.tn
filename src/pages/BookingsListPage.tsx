@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { BookingListFilters, BookingRecord, BookingStatus } from '../data/supabase'
 import { fetchBookings } from '../data/supabase'
+import { openWhatsAppChat } from '../utils/whatsapp'
 
 interface BookingsListPageProps {
   onSelectBooking: (id: string) => void
@@ -151,13 +152,14 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                   <th>Stay</th>
                   <th>Status</th>
                   <th>Total</th>
+                  <th>WhatsApp</th>
                   <th></th>
                 </tr>
               </thead>
               <tbody>
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={6} className="empty">
+                    <td colSpan={7} className="empty">
                       No bookings found.
                     </td>
                   </tr>
@@ -179,6 +181,22 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                         </span>
                       </td>
                       <td>{formatCurrency(booking.total_amount)}</td>
+                      <td>
+                        {booking.guest_whatsapp_number ? (
+                          <button
+                            className="link"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              openWhatsAppChat(booking.guest_whatsapp_number!, booking.id)
+                            }}
+                          >
+                            {booking.guest_whatsapp_number}
+                          </button>
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                       <td>
                         <button className="link" type="button" onClick={() => onSelectBooking(booking.id)}>
                           View
