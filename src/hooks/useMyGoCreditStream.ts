@@ -42,6 +42,8 @@ export const useMyGoCreditStream = () => {
         }
 
         // Create SSE connection with auth token in query param
+        // NOTE: Passing JWT in URL is not ideal for security (can be logged).
+        // For production, consider server-side proxy with cookie/header validation.
         const url = `${getApiBaseUrl()}/api/admin/mygo/credit/stream?token=${encodeURIComponent(session.access_token)}`
         const eventSource = new EventSource(url)
         eventSourceRef.current = eventSource

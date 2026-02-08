@@ -11,10 +11,8 @@ export default function SettingsPage() {
   const [selectedPolicy, setSelectedPolicy] = useState<'STRICT' | 'ON_HOLD_PREAUTH'>('STRICT')
   const [showConfirm, setShowConfirm] = useState(false)
 
-  // Update selected policy when data loads
-  if (policy && !loading && selectedPolicy !== policy.policy) {
-    setSelectedPolicy(policy.policy)
-  }
+  // Use the current policy value if available, otherwise use selectedPolicy state
+  const currentPolicy = policy?.policy || selectedPolicy
 
   const handleSave = () => {
     setShowConfirm(true)
@@ -22,7 +20,7 @@ export default function SettingsPage() {
 
   const confirmSave = async () => {
     setShowConfirm(false)
-    await updatePolicy(selectedPolicy)
+    await updatePolicy(currentPolicy)
   }
 
   const cancelSave = () => {
@@ -71,7 +69,7 @@ export default function SettingsPage() {
                 type="radio"
                 name="policy"
                 value="STRICT"
-                checked={selectedPolicy === 'STRICT'}
+                checked={currentPolicy === 'STRICT'}
                 onChange={(e) => setSelectedPolicy(e.target.value as 'STRICT')}
               />
               <div>
@@ -88,7 +86,7 @@ export default function SettingsPage() {
                 type="radio"
                 name="policy"
                 value="ON_HOLD_PREAUTH"
-                checked={selectedPolicy === 'ON_HOLD_PREAUTH'}
+                checked={currentPolicy === 'ON_HOLD_PREAUTH'}
                 onChange={(e) => setSelectedPolicy(e.target.value as 'ON_HOLD_PREAUTH')}
               />
               <div>
@@ -126,7 +124,7 @@ export default function SettingsPage() {
             <button
               type="button"
               onClick={handleSave}
-              disabled={saving || selectedPolicy === policy?.policy}
+              disabled={saving || currentPolicy === policy?.policy}
             >
               {saving ? 'Enregistrement...' : 'Enregistrer'}
             </button>
@@ -166,7 +164,7 @@ export default function SettingsPage() {
             <h2>Confirmer la modification</h2>
             <p>
               Êtes-vous sûr de vouloir changer la politique de checkout de{' '}
-              <strong>{policy?.policy}</strong> à <strong>{selectedPolicy}</strong> ?
+              <strong>{policy?.policy}</strong> à <strong>{currentPolicy}</strong> ?
             </p>
             <p className="muted">
               Cette modification affectera toutes les nouvelles réservations.

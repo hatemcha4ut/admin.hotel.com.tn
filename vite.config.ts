@@ -10,7 +10,7 @@ function versionPlugin() {
     name: 'version-plugin',
     buildStart() {
       try {
-        // Get git SHA (short version)
+        // Get full git SHA
         const sha = execSync('git rev-parse HEAD').toString().trim()
         
         // Generate version.json

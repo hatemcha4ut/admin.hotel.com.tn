@@ -31,6 +31,16 @@ const formatDateTime = (value: string | null): string => {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleString()
 }
 
+const formatCurrency = (value: number | null, currency?: string): string => {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+  return new Intl.NumberFormat('fr-TN', {
+    style: 'currency',
+    currency: currency || 'USD',
+  }).format(value)
+}
+
 const getMyGoStateEmoji = (state?: 'OnRequest' | 'Validated' | 'Cancelled'): string => {
   if (!state) return ''
   switch (state) {
@@ -205,7 +215,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
               <div>
                 <h2>Total</h2>
                 <p className="detail-title">
-                  {booking.total_amount === null ? '-' : `${booking.currency || 'USD'} ${booking.total_amount.toLocaleString()}`}
+                  {formatCurrency(booking.total_amount, booking.currency)}
                 </p>
               </div>
               <div>
