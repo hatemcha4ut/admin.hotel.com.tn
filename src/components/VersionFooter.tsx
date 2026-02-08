@@ -12,7 +12,12 @@ export default function VersionFooter() {
     fetch('/version.json')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => setVersion(data))
-      .catch(() => setVersion(null))
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn('Failed to fetch version.json:', err)
+        }
+        setVersion(null)
+      })
   }, [])
 
   if (!version) return null
