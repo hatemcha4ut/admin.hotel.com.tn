@@ -10,6 +10,8 @@ const menuItems = [
   { label: 'Réservations', to: '/reservations', roles: [ROLES.admin, ROLES.manager] },
   { label: 'Rapports', to: '/reports', roles: [ROLES.admin, ROLES.manager] },
   { label: 'Utilisateurs', to: '/users', roles: [ROLES.admin] },
+  { label: 'Paramètres', to: '/settings', roles: [ROLES.admin] },
+  { label: 'Sécurité', to: '/security', roles: [ROLES.admin] },
 ]
 
 function AdminLayout() {

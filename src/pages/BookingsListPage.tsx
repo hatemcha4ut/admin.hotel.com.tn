@@ -2,9 +2,20 @@ import { useEffect, useMemo, useState } from 'react'
 import type { BookingListFilters, BookingRecord, BookingStatus } from '../data/supabase'
 import { fetchBookings } from '../data/supabase'
 import { openWhatsAppChat } from '../utils/whatsapp'
+import { useAdminBookings } from '../hooks/useAdminBookings'
 
 interface BookingsListPageProps {
   onSelectBooking: (id: string) => void
+}
+
+// Extended booking record that may include admin fields
+interface ExtendedBookingRecord extends BookingRecord {
+  mygo_booking_id?: string
+  myGoState?: 'OnRequest' | 'Validated' | 'Cancelled'
+  clictopay_order_id?: string
+  payment_status?: 'preauth' | 'captured' | 'reversed' | 'failed'
+  validated_at?: string | null
+  cancelled_at?: string | null
 }
 
 const PAGE_SIZE = 10
@@ -37,16 +48,49 @@ const formatCurrency = (value: number | null): string => {
   }).format(value)
 }
 
+const getMyGoStateEmoji = (state?: 'OnRequest' | 'Validated' | 'Cancelled'): string => {
+  if (!state) return ''
+  switch (state) {
+    case 'OnRequest':
+      return '🟡'
+    case 'Validated':
+      return '🟢'
+    case 'Cancelled':
+      return '🔴'
+    default:
+      return ''
+  }
+}
+
+const getPaymentStatusBadge = (status?: string): string => {
+  if (!status) return '-'
+  switch (status) {
+    case 'preauth':
+      return 'Pré-auth'
+    case 'captured':
+      return 'Capturé'
+    case 'reversed':
+      return 'Annulé'
+    case 'failed':
+      return 'Échoué'
+    default:
+      return status
+  }
+}
+
 const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
   const [status, setStatus] = useState<BookingStatus | 'all'>('all')
   const [guest, setGuest] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
   const [page, setPage] = useState(1)
-  const [bookings, setBookings] = useState<BookingRecord[]>([])
+  const [bookings, setBookings] = useState<ExtendedBookingRecord[]>([])
   const [total, setTotal] = useState(0)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [actionLoading, setActionLoading] = useState<string | null>(null)
+  
+  const { refreshStatus, cancel } = useAdminBookings()
 
   const filters = useMemo<BookingListFilters>(
     () => ({
@@ -95,6 +139,43 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE))
   const canGoPrev = page > 1
   const canGoNext = page < totalPages
+
+  const handleRefresh = async (id: string) => {
+    setActionLoading(id)
+    try {
+      const updated = await refreshStatus(id)
+      if (updated) {
+        // Update the booking in the list
+        setBookings((prev) =>
+          prev.map((b) => (b.id === id ? { ...b, ...updated } as ExtendedBookingRecord : b))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to refresh booking:', err)
+    } finally {
+      setActionLoading(null)
+    }
+  }
+
+  const handleCancel = async (id: string) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ? Cette action est irréversible.')) {
+      return
+    }
+    setActionLoading(id)
+    try {
+      const updated = await cancel(id)
+      if (updated) {
+        // Update the booking in the list
+        setBookings((prev) =>
+          prev.map((b) => (b.id === id ? { ...b, ...updated } as ExtendedBookingRecord : b))
+        )
+      }
+    } catch (err) {
+      console.error('Failed to cancel booking:', err)
+    } finally {
+      setActionLoading(null)
+    }
+  }
 
   return (
     <div className="page">
@@ -148,25 +229,31 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
               <thead>
                 <tr>
                   <th>ID</th>
+                  <th>myGO ID</th>
                   <th>Guest</th>
                   <th>Stay</th>
-                  <th>Status</th>
+                  <th>État myGO</th>
+                  <th>Statut</th>
+                  <th>Paiement</th>
                   <th>Total</th>
                   <th>WhatsApp</th>
-                  <th></th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {bookings.length === 0 ? (
                   <tr>
-                    <td colSpan={7} className="empty">
+                    <td colSpan={10} className="empty">
                       No bookings found.
                     </td>
                   </tr>
                 ) : (
                   bookings.map((booking) => (
                     <tr key={booking.id}>
-                      <td className="mono">{booking.id}</td>
+                      <td className="mono">{booking.id.substring(0, 8)}</td>
+                      <td className="mono">
+                        {booking.mygo_booking_id ? booking.mygo_booking_id.substring(0, 8) : '-'}
+                      </td>
                       <td>
                         <div className="cell-title">{booking.guest_name ?? 'Guest'}</div>
                         <div className="muted small">{booking.guest_email ?? '-'}</div>
@@ -176,9 +263,20 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                         <div className="muted small">to {formatDate(booking.check_out)}</div>
                       </td>
                       <td>
+                        {booking.myGoState && (
+                          <span title={booking.myGoState}>
+                            {getMyGoStateEmoji(booking.myGoState)} {booking.myGoState}
+                          </span>
+                        )}
+                        {!booking.myGoState && '-'}
+                      </td>
+                      <td>
                         <span className={`status status-${booking.status ?? 'pending'}`}>
                           {booking.status ?? 'pending'}
                         </span>
+                      </td>
+                      <td>
+                        <span className="small">{getPaymentStatusBadge(booking.payment_status)}</span>
                       </td>
                       <td>{formatCurrency(booking.total_amount)}</td>
                       <td>
@@ -198,9 +296,42 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                         )}
                       </td>
                       <td>
-                        <button className="link" type="button" onClick={() => onSelectBooking(booking.id)}>
-                          View
-                        </button>
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <button 
+                            className="link" 
+                            type="button" 
+                            onClick={() => onSelectBooking(booking.id)}
+                          >
+                            Voir
+                          </button>
+                          <button
+                            className="link"
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleRefresh(booking.id)
+                            }}
+                            disabled={actionLoading === booking.id}
+                            title="Rafraîchir le statut depuis myGO et le fournisseur de paiement"
+                          >
+                            {actionLoading === booking.id ? '⏳' : '🔄'}
+                          </button>
+                          {booking.myGoState === 'OnRequest' && (
+                            <button
+                              className="link"
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleCancel(booking.id)
+                              }}
+                              disabled={actionLoading === booking.id}
+                              title="Annuler la réservation"
+                              style={{ color: '#dc2626' }}
+                            >
+                              ❌
+                            </button>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   ))
