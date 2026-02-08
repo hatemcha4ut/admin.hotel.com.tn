@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import MyGoCreditCard from '../components/MyGoCreditCard'
 
 type Booking = {
   id: string
@@ -48,6 +49,8 @@ function Dashboard() {
           <p className="subtitle">Dernières réservations récupérées depuis Supabase.</p>
         </div>
       </header>
+
+      <MyGoCreditCard />
 
       <section className="card">
         {error ? <div className="error">{error}</div> : null}

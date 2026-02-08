@@ -9,6 +9,8 @@ import Dashboard from './pages/Dashboard'
 import LoginPage from './pages/LoginPage'
 import PlaceholderPage from './pages/PlaceholderPage'
 import ReservationsPage from './pages/ReservationsPage'
+import SettingsPage from './pages/SettingsPage'
+import SecurityStatusPage from './pages/SecurityStatusPage'
 
 function RequireAdmin({ children }: { children: React.ReactElement }) {
   const { session, loading, hasAdminAccess } = useAuth()
@@ -43,6 +45,8 @@ const App = () => {
         >
           <Route index element={<Dashboard />} />
           <Route path="reservations" element={<ReservationsPage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="security" element={<SecurityStatusPage />} />
           <Route
             path="reports"
             element={
