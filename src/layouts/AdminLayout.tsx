@@ -1,6 +1,7 @@
 import { NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import LoadingState from '../components/LoadingState'
+import VersionFooter from '../components/VersionFooter'
 
 import { ROLES } from '../auth/roles'
 
@@ -56,6 +57,7 @@ function AdminLayout() {
           <Outlet />
         </main>
       </div>
+      <VersionFooter />
     </div>
   )
 }

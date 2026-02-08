@@ -384,3 +384,13 @@ button:disabled {
     flex-wrap: wrap;
   }
 }
+
+.version-footer {
+  text-align: center;
+  padding: 12px 16px;
+  font-size: 11px;
+  color: #9ca3af;
+  font-family: 'SFMono-Regular', ui-monospace, monospace;
+  border-top: 1px solid #e5e7eb;
+  background: #f9fafb;
+}
