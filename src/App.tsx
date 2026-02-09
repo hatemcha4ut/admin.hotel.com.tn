@@ -52,7 +52,7 @@ const App = () => {
             element={
               <PlaceholderPage
                 title="Rapports"
-                description="Consultez les indicateurs clés pour les équipes."
+                description="Consultez les indicateurs clés pour les équipes. (Disponible prochainement)"
               />
             }
           />
@@ -61,7 +61,7 @@ const App = () => {
             element={
               <PlaceholderPage
                 title="Utilisateurs"
-                description="Gérez les accès et les profils administrateurs."
+                description="Gérez les accès et les profils administrateurs. (Disponible prochainement)"
               />
             }
           />
