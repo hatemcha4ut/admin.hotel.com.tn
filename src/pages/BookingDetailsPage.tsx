@@ -4,6 +4,7 @@ import { fetchBookingById, updateBookingStatus, fetchUserWhatsApp } from '../dat
 import WhatsAppButton from '../components/WhatsAppButton'
 import { getBookingModeLabel } from '../utils/whatsapp'
 import { useAdminBookings } from '../hooks/useAdminBookings'
+import { isActionableBooking, getActionableAlertMessage } from '../utils/bookingHelpers'
 
 interface BookingDetailsPageProps {
   bookingId: string
@@ -70,11 +71,6 @@ const getPaymentStatusBadge = (status?: string): string => {
     default:
       return status
   }
-}
-
-const isActionableBooking = (booking?: ExtendedBookingRecord): boolean => {
-  if (!booking) return false
-  return booking.myGoState === 'OnRequest' || booking.wallet_insufficient === true
 }
 
 const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
@@ -207,15 +203,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
             {isActionableBooking(booking) && (
               <div className="booking-alert booking-alert-actionable">
                 <strong>⚠️ Action Requise</strong>
-                {booking.wallet_insufficient && booking.myGoState === 'OnRequest' && (
-                  <p>Cette réservation est en attente (OnRequest) ET le crédit myGO est insuffisant. Veuillez recharger le crédit et rafraîchir le statut.</p>
-                )}
-                {booking.wallet_insufficient && booking.myGoState !== 'OnRequest' && (
-                  <p>Le crédit myGO était insuffisant lors de la tentative de création de cette réservation. Veuillez recharger le crédit et rafraîchir le statut.</p>
-                )}
-                {!booking.wallet_insufficient && booking.myGoState === 'OnRequest' && (
-                  <p>Cette réservation est en attente de validation par myGO. Vous pouvez rafraîchir le statut ou annuler la réservation si nécessaire.</p>
-                )}
+                <p>{getActionableAlertMessage(booking)}</p>
               </div>
             )}
 

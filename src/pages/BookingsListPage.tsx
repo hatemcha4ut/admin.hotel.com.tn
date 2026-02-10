@@ -3,6 +3,7 @@ import type { BookingListFilters, BookingRecord, BookingStatus } from '../data/s
 import { fetchBookings } from '../data/supabase'
 import { openWhatsAppChat } from '../utils/whatsapp'
 import { useAdminBookings } from '../hooks/useAdminBookings'
+import { isActionableBooking, getActionableLabel } from '../utils/bookingHelpers'
 
 interface BookingsListPageProps {
   onSelectBooking: (id: string) => void
@@ -62,23 +63,6 @@ const getMyGoStateEmoji = (state?: 'OnRequest' | 'Validated' | 'Cancelled'): str
     default:
       return ''
   }
-}
-
-const isActionableBooking = (booking: ExtendedBookingRecord): boolean => {
-  return booking.myGoState === 'OnRequest' || booking.wallet_insufficient === true
-}
-
-const getActionableLabel = (booking: ExtendedBookingRecord): string => {
-  if (booking.wallet_insufficient && booking.myGoState === 'OnRequest') {
-    return '🔴 OnRequest + Crédit Insuffisant'
-  }
-  if (booking.wallet_insufficient) {
-    return '🔴 Crédit Insuffisant'
-  }
-  if (booking.myGoState === 'OnRequest') {
-    return '🟡 OnRequest'
-  }
-  return ''
 }
 
 const getPaymentStatusBadge = (status?: string): string => {

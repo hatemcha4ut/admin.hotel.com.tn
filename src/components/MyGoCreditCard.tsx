@@ -5,6 +5,7 @@
 
 import { useMyGoCredit } from '../hooks/useMyGoCredit'
 import { useMyGoCreditStream } from '../hooks/useMyGoCreditStream'
+import { getCreditStatus, type CreditStatus } from '../config/creditThresholds'
 
 export default function MyGoCreditCard() {
   // Get initial snapshot
@@ -36,18 +37,7 @@ export default function MyGoCreditCard() {
     })
   }
 
-  // Credit status thresholds (in base currency units)
-  const LOW_CREDIT_THRESHOLD = 1000
-  const CRITICAL_CREDIT_THRESHOLD = 500
-
-  const getCreditStatus = () => {
-    if (!credit) return 'unknown'
-    if (credit.RemainingDeposit <= CRITICAL_CREDIT_THRESHOLD) return 'critical'
-    if (credit.RemainingDeposit <= LOW_CREDIT_THRESHOLD) return 'low'
-    return 'adequate'
-  }
-
-  const creditStatus = getCreditStatus()
+  const creditStatus: CreditStatus = getCreditStatus(credit?.RemainingDeposit)
 
   return (
     <div className={`card mygo-credit-card credit-status-${creditStatus}`}>
