@@ -16,12 +16,14 @@ interface ExtendedBookingRecord extends BookingRecord {
   payment_status?: 'preauth' | 'captured' | 'reversed' | 'failed'
   validated_at?: string | null
   cancelled_at?: string | null
+  wallet_insufficient?: boolean
 }
 
 const PAGE_SIZE = 10
 
-const statusOptions: Array<{ label: string; value: BookingStatus | 'all' }> = [
+const statusOptions: Array<{ label: string; value: BookingStatus | 'all' | 'actionable' }> = [
   { label: 'All', value: 'all' },
+  { label: '🔔 Actionable (OnRequest/Wallet Low)', value: 'actionable' },
   { label: 'Pending', value: 'pending' },
   { label: 'Confirmed', value: 'confirmed' },
   { label: 'Cancelled', value: 'cancelled' },
@@ -62,6 +64,23 @@ const getMyGoStateEmoji = (state?: 'OnRequest' | 'Validated' | 'Cancelled'): str
   }
 }
 
+const isActionableBooking = (booking: ExtendedBookingRecord): boolean => {
+  return booking.myGoState === 'OnRequest' || booking.wallet_insufficient === true
+}
+
+const getActionableLabel = (booking: ExtendedBookingRecord): string => {
+  if (booking.wallet_insufficient && booking.myGoState === 'OnRequest') {
+    return '🔴 OnRequest + Crédit Insuffisant'
+  }
+  if (booking.wallet_insufficient) {
+    return '🔴 Crédit Insuffisant'
+  }
+  if (booking.myGoState === 'OnRequest') {
+    return '🟡 OnRequest'
+  }
+  return ''
+}
+
 const getPaymentStatusBadge = (status?: string): string => {
   if (!status) return '-'
   switch (status) {
@@ -79,7 +98,7 @@ const getPaymentStatusBadge = (status?: string): string => {
 }
 
 const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
-  const [status, setStatus] = useState<BookingStatus | 'all'>('all')
+  const [status, setStatus] = useState<BookingStatus | 'all' | 'actionable'>('all')
   const [guest, setGuest] = useState('')
   const [startDate, setStartDate] = useState('')
   const [endDate, setEndDate] = useState('')
@@ -92,9 +111,16 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
   
   const { refreshStatus, cancel } = useAdminBookings()
 
+  // Filter bookings for actionable state locally
+  const displayedBookings = status === 'actionable' 
+    ? bookings.filter(isActionableBooking)
+    : bookings
+
+  const displayedTotal = status === 'actionable' ? displayedBookings.length : total
+
   const filters = useMemo<BookingListFilters>(
     () => ({
-      status,
+      status: status === 'actionable' || status === 'all' ? 'all' : status,
       guest: guest.trim() || undefined,
       startDate: startDate || undefined,
       endDate: endDate || undefined,
@@ -189,7 +215,7 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
       <section className="filters">
         <label className="field">
           <span>Status</span>
-          <select value={status} onChange={(event) => setStatus(event.target.value as BookingStatus | 'all')}>
+          <select value={status} onChange={(event) => setStatus(event.target.value as BookingStatus | 'all' | 'actionable')}>
             {statusOptions.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -219,7 +245,7 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
       <section className="card">
         <div className="table-header">
           <h2>Results</h2>
-          <span className="muted">{total} total</span>
+          <span className="muted">{displayedTotal} total</span>
         </div>
         {error ? <div className="error">{error}</div> : null}
         {loading ? <div className="loading">Loading bookings…</div> : null}
@@ -241,15 +267,17 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                 </tr>
               </thead>
               <tbody>
-                {bookings.length === 0 ? (
+                {displayedBookings.length === 0 ? (
                   <tr>
                     <td colSpan={10} className="empty">
                       No bookings found.
                     </td>
                   </tr>
                 ) : (
-                  bookings.map((booking) => (
-                    <tr key={booking.id}>
+                  displayedBookings.map((booking) => {
+                    const isActionable = isActionableBooking(booking)
+                    return (
+                    <tr key={booking.id} className={isActionable ? 'booking-row-actionable' : ''}>
                       <td className="mono">{booking.id.substring(0, 8)}</td>
                       <td className="mono">
                         {booking.mygo_booking_id ? booking.mygo_booking_id.substring(0, 8) : '-'}
@@ -269,6 +297,11 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                           </span>
                         )}
                         {!booking.myGoState && '-'}
+                        {isActionable && (
+                          <div className="actionable-badge">
+                            {getActionableLabel(booking)}
+                          </div>
+                        )}
                       </td>
                       <td>
                         <span className={`status status-${booking.status ?? 'pending'}`}>
@@ -316,7 +349,7 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                           >
                             {actionLoading === booking.id ? '⏳' : '🔄'}
                           </button>
-                          {booking.myGoState === 'OnRequest' && (
+                          {isActionable && (
                             <button
                               className="link"
                               type="button"
@@ -334,7 +367,8 @@ const BookingsListPage = ({ onSelectBooking }: BookingsListPageProps) => {
                         </div>
                       </td>
                     </tr>
-                  ))
+                    )
+                  })
                 )}
               </tbody>
             </table>

@@ -19,6 +19,7 @@ interface ExtendedBookingRecord extends BookingRecord {
   validated_at?: string | null
   cancelled_at?: string | null
   currency?: string
+  wallet_insufficient?: boolean
 }
 
 const statusOptions: BookingStatus[] = ['pending', 'confirmed', 'cancelled', 'checked_in', 'checked_out']
@@ -69,6 +70,11 @@ const getPaymentStatusBadge = (status?: string): string => {
     default:
       return status
   }
+}
+
+const isActionableBooking = (booking?: ExtendedBookingRecord): boolean => {
+  if (!booking) return false
+  return booking.myGoState === 'OnRequest' || booking.wallet_insufficient === true
 }
 
 const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
@@ -197,6 +203,22 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
         {loading ? <div className="loading">Loading booking…</div> : null}
         {!loading && booking ? (
           <>
+            {/* Actionable State Alert */}
+            {isActionableBooking(booking) && (
+              <div className="booking-alert booking-alert-actionable">
+                <strong>⚠️ Action Requise</strong>
+                {booking.wallet_insufficient && booking.myGoState === 'OnRequest' && (
+                  <p>Cette réservation est en attente (OnRequest) ET le crédit myGO est insuffisant. Veuillez recharger le crédit et rafraîchir le statut.</p>
+                )}
+                {booking.wallet_insufficient && booking.myGoState !== 'OnRequest' && (
+                  <p>Le crédit myGO était insuffisant lors de la tentative de création de cette réservation. Veuillez recharger le crédit et rafraîchir le statut.</p>
+                )}
+                {!booking.wallet_insufficient && booking.myGoState === 'OnRequest' && (
+                  <p>Cette réservation est en attente de validation par myGO. Vous pouvez rafraîchir le statut ou annuler la réservation si nécessaire.</p>
+                )}
+              </div>
+            )}
+
             <div className="details-grid">
               <div>
                 <h2>Guest</h2>
@@ -252,16 +274,26 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
             </div>
 
             {/* myGO State Section */}
-            {booking.myGoState && (
+            {(booking.myGoState || booking.wallet_insufficient) && (
               <div style={{ marginTop: '32px', paddingTop: '32px', borderTop: '1px solid #e5e7eb' }}>
                 <h2>État myGO</h2>
                 <div className="info-grid">
-                  <div className="info-item">
-                    <span className="label">État actuel</span>
-                    <span className="value" style={{ fontSize: '20px' }}>
-                      {getMyGoStateEmoji(booking.myGoState)} {booking.myGoState}
-                    </span>
-                  </div>
+                  {booking.myGoState && (
+                    <div className="info-item">
+                      <span className="label">État actuel</span>
+                      <span className="value" style={{ fontSize: '20px' }}>
+                        {getMyGoStateEmoji(booking.myGoState)} {booking.myGoState}
+                      </span>
+                    </div>
+                  )}
+                  {booking.wallet_insufficient && (
+                    <div className="info-item">
+                      <span className="label">Crédit Wallet</span>
+                      <span className="value" style={{ color: '#dc2626' }}>
+                        🔴 Insuffisant
+                      </span>
+                    </div>
+                  )}
                   {booking.mygo_booking_id && (
                     <div className="info-item">
                       <span className="label">myGO Booking ID</span>
@@ -321,7 +353,7 @@ const BookingDetailsPage = ({ bookingId, onBack }: BookingDetailsPageProps) => {
                 >
                   {actionLoading ? 'Rafraîchissement...' : '🔄 Rafraîchir le statut'}
                 </button>
-                {booking.myGoState === 'OnRequest' && (
+                {isActionableBooking(booking) && (
                   <button
                     type="button"
                     onClick={handleCancel}

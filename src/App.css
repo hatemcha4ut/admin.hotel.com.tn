@@ -88,6 +88,26 @@ th {
   background: #f9fafb;
 }
 
+tbody tr.booking-row-actionable {
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+}
+
+tbody tr.booking-row-actionable:hover {
+  background: #fde68a;
+}
+
+.actionable-badge {
+  margin-top: 4px;
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 600;
+  background: #fee2e2;
+  color: #991b1b;
+}
+
 .table-header {
   display: flex;
   justify-content: space-between;
@@ -400,6 +420,18 @@ button:disabled {
   margin-bottom: 24px;
 }
 
+.mygo-credit-card.credit-status-critical {
+  border: 2px solid #dc2626;
+}
+
+.mygo-credit-card.credit-status-low {
+  border: 2px solid #f59e0b;
+}
+
+.mygo-credit-card.credit-status-adequate {
+  border: 2px solid #10b981;
+}
+
 .mygo-credit-card .card-header {
   display: flex;
   justify-content: space-between;
@@ -446,6 +478,54 @@ button:disabled {
   font-size: 32px;
   font-weight: 700;
   color: #0f172a;
+}
+
+.credit-amount .amount.amount-critical {
+  color: #dc2626;
+}
+
+.credit-amount .amount.amount-low {
+  color: #f59e0b;
+}
+
+.credit-amount .amount.amount-adequate {
+  color: #10b981;
+}
+
+.credit-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 16px;
+}
+
+.credit-alert strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.credit-alert p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.credit-alert-critical {
+  background: #fee2e2;
+  color: #991b1b;
+  border-left: 4px solid #dc2626;
+}
+
+.credit-alert-low {
+  background: #fef3c7;
+  color: #92400e;
+  border-left: 4px solid #f59e0b;
+}
+
+.credit-alert-adequate {
+  background: #dcfce7;
+  color: #166534;
+  border-left: 4px solid #10b981;
 }
 
 .credit-meta {
@@ -647,4 +727,29 @@ button:disabled {
   font-weight: 500;
   color: #111827;
   word-break: break-all;
+}
+
+/* Booking Detail Alerts */
+.booking-alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.booking-alert strong {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+
+.booking-alert p {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.booking-alert-actionable {
+  background: #fef3c7;
+  color: #92400e;
+  border-left: 4px solid #f59e0b;
 }
