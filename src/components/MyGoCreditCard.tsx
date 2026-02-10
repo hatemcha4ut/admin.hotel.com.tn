@@ -5,6 +5,7 @@
 
 import { useMyGoCredit } from '../hooks/useMyGoCredit'
 import { useMyGoCreditStream } from '../hooks/useMyGoCreditStream'
+import { getCreditStatus, type CreditStatus } from '../config/creditThresholds'
 
 export default function MyGoCreditCard() {
   // Get initial snapshot
@@ -36,8 +37,10 @@ export default function MyGoCreditCard() {
     })
   }
 
+  const creditStatus: CreditStatus = getCreditStatus(credit?.RemainingDeposit)
+
   return (
-    <div className="card mygo-credit-card">
+    <div className={`card mygo-credit-card credit-status-${creditStatus}`}>
       <div className="card-header">
         <h2>Crédit myGO</h2>
         {isConnected && (
@@ -58,9 +61,29 @@ export default function MyGoCreditCard() {
         </div>
       ) : credit ? (
         <div className="credit-content">
+          {/* Credit Status Alert */}
+          {creditStatus === 'critical' && (
+            <div className="credit-alert credit-alert-critical">
+              <strong>⚠️ Crédit Critique</strong>
+              <p>Le crédit myGO est très bas. Veuillez recharger immédiatement pour éviter l'interruption des réservations.</p>
+            </div>
+          )}
+          {creditStatus === 'low' && (
+            <div className="credit-alert credit-alert-low">
+              <strong>⚠️ Crédit Faible</strong>
+              <p>Le crédit myGO est bas. Envisagez de recharger prochainement.</p>
+            </div>
+          )}
+          {creditStatus === 'adequate' && (
+            <div className="credit-alert credit-alert-adequate">
+              <strong>✓ Crédit Suffisant</strong>
+              <p>Le crédit myGO est à un niveau adéquat.</p>
+            </div>
+          )}
+          
           <div className="credit-amount">
             <span className="label">Dépôt restant</span>
-            <span className="amount">
+            <span className={`amount amount-${creditStatus}`}>
               {formatCurrency(credit.RemainingDeposit, credit.Currency)}
             </span>
           </div>

@@ -76,6 +76,7 @@ export interface AdminBooking {
   cancelled_at?: string
   clictopay_order_id?: string
   payment_status?: 'preauth' | 'captured' | 'reversed' | 'failed'
+  wallet_insufficient?: boolean
 }
 
 export interface VersionInfo {
