@@ -1,16 +1,9 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { getBookings, type AdminBooking } from '../lib/adminApi'
 import MyGoCreditCard from '../components/MyGoCreditCard'
 
-type Booking = {
-  id: string
-  guest_name: string | null
-  guest_email: string | null
-  status: string | null
-}
-
 function Dashboard() {
-  const [bookings, setBookings] = useState<Booking[]>([])
+  const [bookings, setBookings] = useState<AdminBooking[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -20,18 +13,22 @@ function Dashboard() {
     const loadBookings = async () => {
       setLoading(true)
       setError(null)
-      const { data, error: fetchError } = await supabase
-        .from('bookings')
-        .select('id, guest_name, guest_email, status')
-      if (!isMounted) {
-        return
-      }
-      if (fetchError) {
-        setError(fetchError.message)
-      } else {
+      try {
+        const data = await getBookings({ limit: 10 })
+        if (!isMounted) {
+          return
+        }
         setBookings(data ?? [])
+      } catch (err) {
+        if (!isMounted) {
+          return
+        }
+        setError(err instanceof Error ? err.message : 'Erreur lors du chargement')
+      } finally {
+        if (isMounted) {
+          setLoading(false)
+        }
       }
-      setLoading(false)
     }
 
     loadBookings()
@@ -46,7 +43,7 @@ function Dashboard() {
       <header className="page-header">
         <div>
           <h1>Tableau de bord</h1>
-          <p className="subtitle">Dernières réservations récupérées depuis Supabase.</p>
+          <p className="subtitle">Dernières réservations récupérées via l'API backend.</p>
         </div>
       </header>
 
@@ -67,6 +64,8 @@ function Dashboard() {
                   <th>Client</th>
                   <th>Email</th>
                   <th>Statut</th>
+                  <th>État myGO</th>
+                  <th>Statut Paiement</th>
                 </tr>
               </thead>
               <tbody>
@@ -76,6 +75,8 @@ function Dashboard() {
                     <td>{booking.guest_name ?? '-'}</td>
                     <td>{booking.guest_email ?? '-'}</td>
                     <td>{booking.status ?? '-'}</td>
+                    <td>{booking.myGoState ?? '-'}</td>
+                    <td>{booking.payment_status ?? '-'}</td>
                   </tr>
                 ))}
               </tbody>
